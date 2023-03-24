@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 
-// create a new database
+// create a new database with Schema and Blog model
 mongoose.connect("mongodb://localhost:27017/blogDB", { useNewUrlParser: true });
 
 const blogSchema = new mongoose.Schema ({
@@ -31,9 +31,9 @@ const blogSchema = new mongoose.Schema ({
 const Blog = mongoose.model("Blog", blogSchema);
 
 
-app.get("/", function(req, res){
+app.get("/", function(req, res){                // home page route
   
-  Blog.find({})
+  Blog.find({})                                 // find all the blogs and post them to the home page
   .then(function(blogs){
     res.render("home", {
       startingContent: homeStartingContent,
@@ -55,18 +55,18 @@ app.get("/contact", function(req, res){
   res.render("contact", {contactContent: contactContent});
 });
 
-app.get("/compose", function(req, res){
+app.get("/compose", function(req, res){         // EJS template to display page
   res.render("compose");
 });
 
-app.post("/compose", function(req, res){
+app.post("/compose", function(req, res){        // write blog entry and post it to home page
   const post = new Blog ({
     title: req.body.postTitle,
     content: req.body.postBody
   });
 
   post.save()
-    .then(function(){
+    .then(function(){                           // save the post and then redirect and refresh home page
       res.redirect("/");
     })
     .catch(function(err){
@@ -77,24 +77,24 @@ app.post("/compose", function(req, res){
 
 });
 
-app.get("/posts/:postId", function(req, res){
-  const requestedId = req.params.postId;
+app.get("/posts/:postId", function(req, res){   // changed postID to reflect the link name in Home.ejs
+  const requestedId = req.params.postId;        // save the id of the "Read more" link clicked
 
-  console.log(requestedId);
+  // console.log(requestedId);
 
-  Blog.findById(requestedId)
+  Blog.findById(requestedId)                     // find blog by ID then display the page created by the express parameters
   .then(function(post){
     res.render("post", {
-      title: post.title,
+      title: post.title,                        // render screen to display the individual job posts
       content: post.content
     });
   })
-  .catch(function(err){
+  .catch(function(err){                         // log any errors 
     console.log(err);
   });
 
 });
 
 app.listen(3000, function() {
-  console.log("Server started on port 3000");
+  console.log("Server started on port 3000"); // log the port is active and running
 });
